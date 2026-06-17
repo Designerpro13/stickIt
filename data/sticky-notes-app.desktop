@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Sticky Notes
+Comment=Desktop sticky notes application
+Exec=python3 -m src.main
+Icon=accessories-text-editor
+Terminal=false
+Categories=Utility;
+X-GNOME-Autostart-enabled=true
+StartupNotify=false
