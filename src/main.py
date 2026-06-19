@@ -131,11 +131,19 @@ class StickyNotesApp(Gtk.Application):
             on_save=self._on_note_save,
             on_delete=self._on_note_delete,
             on_color_change=self._on_note_color_change,
+            on_new_note=self._on_create_new_note,
         )
         window.set_application(self)
         self._windows[note.id] = window
         window.present()
         window.focus_editor()
+
+    def _on_create_new_note(self) -> None:
+        """Handle new note request from any NoteWindow's + button."""
+        if self._note_manager is None:
+            return
+        note = self._note_manager.create_note()
+        self._spawn_note_window(note)
 
     def _on_new_note(self, action: Gio.SimpleAction, parameter: None) -> None:
         """Handle the 'new-note' action: create a note and spawn its window."""

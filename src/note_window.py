@@ -81,12 +81,14 @@ if GTK_AVAILABLE:
             on_save: Optional[Callable[[Note], None]] = None,
             on_delete: Optional[Callable[[str], None]] = None,
             on_color_change: Optional[Callable[[str, str], None]] = None,
+            on_new_note: Optional[Callable[[], None]] = None,
         ):
             super().__init__()
             self._note = note
             self._on_save = on_save
             self._on_delete = on_delete
             self._on_color_change = on_color_change
+            self._on_new_note = on_new_note
             self._autosave_timeout_id: Optional[int] = None
             self._is_pinned: bool = note.always_on_top
             self._bg_css_provider = Gtk.CssProvider()
@@ -196,6 +198,13 @@ if GTK_AVAILABLE:
             color_button.connect("clicked", self._on_color_button_clicked)
             title_bar.append(color_button)
 
+            # New note button
+            new_note_button = Gtk.Button(label="+")
+            new_note_button.set_tooltip_text("New note")
+            new_note_button.add_css_class("flat")
+            new_note_button.connect("clicked", self._on_new_note_clicked)
+            title_bar.append(new_note_button)
+
             # Spacer to push close button to the right (also serves as drag handle)
             spacer = Gtk.Box()
             spacer.set_hexpand(True)
@@ -261,6 +270,11 @@ if GTK_AVAILABLE:
         def _on_color_button_clicked(self, button: "Gtk.Button") -> None:
             """Show the color palette popover."""
             self._color_popover.popup()
+
+        def _on_new_note_clicked(self, button: "Gtk.Button") -> None:
+            """Handle new note button click."""
+            if self._on_new_note:
+                self._on_new_note()
 
         def _handle_color_selected(self, color_key: str) -> None:
             """Handle color selection from the palette popover."""
