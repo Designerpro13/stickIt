@@ -154,6 +154,10 @@ if GTK_AVAILABLE:
             self._editor = RichTextEditor()
             self._editor.set_vexpand(True)
             self._editor.set_hexpand(True)
+            self._editor.set_left_margin(12)
+            self._editor.set_right_margin(12)
+            self._editor.set_top_margin(8)
+            self._editor.set_bottom_margin(8)
 
             # Wrap editor in a scrolled window for long content
             scrolled = Gtk.ScrolledWindow()
@@ -192,7 +196,7 @@ if GTK_AVAILABLE:
             color_button.connect("clicked", self._on_color_button_clicked)
             title_bar.append(color_button)
 
-            # Spacer to push close button to the right
+            # Spacer to push close button to the right (also serves as drag handle)
             spacer = Gtk.Box()
             spacer.set_hexpand(True)
             title_bar.append(spacer)
@@ -204,12 +208,12 @@ if GTK_AVAILABLE:
             close_button.connect("clicked", self._on_close_clicked)
             title_bar.append(close_button)
 
-            # Drag gesture on title bar for window movement
+            # Drag gesture on the spacer only, so buttons remain clickable
             drag_gesture = Gtk.GestureDrag()
             drag_gesture.connect("drag-begin", self._on_drag_begin)
             drag_gesture.connect("drag-update", self._on_drag_update)
             drag_gesture.connect("drag-end", self._on_drag_end)
-            title_bar.add_controller(drag_gesture)
+            spacer.add_controller(drag_gesture)
 
             return title_bar
 

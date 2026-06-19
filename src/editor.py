@@ -13,8 +13,9 @@ try:
     import gi
 
     gi.require_version("Gtk", "4.0")
+    gi.require_version("Gdk", "4.0")
     gi.require_version("Pango", "1.0")
-    from gi.repository import Gtk, Pango, GLib
+    from gi.repository import Gtk, Gdk, Pango, GLib
 
     GTK_AVAILABLE = True
 except (ImportError, ValueError):
@@ -359,6 +360,32 @@ if GTK_AVAILABLE:
             self.set_editable(True)
             self._buffer = self.get_buffer()
             self._setup_tags()
+            self._setup_shortcuts()
+
+        def _setup_shortcuts(self) -> None:
+            """Set up keyboard shortcuts for formatting (Ctrl+B, Ctrl+I, Ctrl+U)."""
+            key_controller = Gtk.EventControllerKey()
+            key_controller.connect("key-pressed", self._on_key_pressed)
+            self.add_controller(key_controller)
+
+        def _on_key_pressed(self, controller, keyval, keycode, state) -> bool:
+            """Handle key press events for formatting shortcuts."""
+            ctrl = state & Gdk.ModifierType.CONTROL_MASK
+
+            if not ctrl:
+                return False
+
+            if keyval == Gdk.KEY_b or keyval == Gdk.KEY_B:
+                self.apply_format(FormatType.BOLD)
+                return True
+            elif keyval == Gdk.KEY_i or keyval == Gdk.KEY_I:
+                self.apply_format(FormatType.ITALIC)
+                return True
+            elif keyval == Gdk.KEY_u or keyval == Gdk.KEY_U:
+                self.apply_format(FormatType.UNDERLINE)
+                return True
+
+            return False
 
         def _setup_tags(self) -> None:
             """Create text tags for formatting in the buffer's tag table."""
