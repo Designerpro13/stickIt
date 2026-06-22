@@ -30,6 +30,7 @@ class Note:
     height: int = 300
     color: str = "yellow"
     always_on_top: bool = False
+    opacity: float = 1.0
     created_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )

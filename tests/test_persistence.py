@@ -51,7 +51,7 @@ class TestSerialize:
         expected_fields = {
             "id", "content", "position_x", "position_y",
             "width", "height", "color", "always_on_top",
-            "created_at", "modified_at",
+            "opacity", "created_at", "modified_at",
         }
         assert set(data.keys()) == expected_fields
 

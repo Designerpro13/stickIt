@@ -98,6 +98,7 @@ if GTK_AVAILABLE:
             self._apply_initial_color()
             self._connect_signals()
             self._load_content()
+            self._apply_opacity()
 
         @property
         def note(self) -> Note:
@@ -119,6 +120,11 @@ if GTK_AVAILABLE:
             # If note is pinned, apply always-on-top
             if self._is_pinned:
                 self._apply_always_on_top(True)
+
+            # Keyboard shortcut controller for window-level shortcuts
+            key_controller = Gtk.EventControllerKey()
+            key_controller.connect("key-pressed", self._on_window_key_pressed)
+            self.add_controller(key_controller)
 
             # Best-effort positioning (X11 only; Wayland doesn't support programmatic positioning)
             self.connect("realize", self._on_realize)
@@ -455,3 +461,40 @@ if GTK_AVAILABLE:
         def focus_editor(self) -> None:
             """Place keyboard focus in the editor for immediate typing."""
             self._editor.grab_focus()
+
+        # --- Opacity / Transparency ---
+
+        def _apply_opacity(self) -> None:
+            """Apply the note's saved opacity on window creation."""
+            self.set_opacity(self._note.opacity)
+
+        def _on_window_key_pressed(self, controller, keyval, keycode, state) -> bool:
+            """Handle window-level keyboard shortcuts for opacity.
+
+            Ctrl+Alt+Z: increase transparency (decrease opacity)
+            Ctrl+Alt+C: decrease transparency (increase opacity)
+            """
+            ctrl_alt = (
+                Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.ALT_MASK
+            )
+            if (state & ctrl_alt) != ctrl_alt:
+                return False
+
+            OPACITY_STEP = 0.1
+
+            if keyval == Gdk.KEY_z or keyval == Gdk.KEY_Z:
+                # Increase transparency (decrease opacity)
+                new_opacity = max(0.2, self._note.opacity - OPACITY_STEP)
+                self._note.opacity = round(new_opacity, 2)
+                self.set_opacity(self._note.opacity)
+                self._schedule_autosave()
+                return True
+            elif keyval == Gdk.KEY_c or keyval == Gdk.KEY_C:
+                # Decrease transparency (increase opacity)
+                new_opacity = min(1.0, self._note.opacity + OPACITY_STEP)
+                self._note.opacity = round(new_opacity, 2)
+                self.set_opacity(self._note.opacity)
+                self._schedule_autosave()
+                return True
+
+            return False
